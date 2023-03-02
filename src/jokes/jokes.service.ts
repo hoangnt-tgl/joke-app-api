@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { JokeDto } from './joke.dto';
 import { Joke } from './joke.entity';
 
 @Injectable()
@@ -23,7 +24,13 @@ export class JokesService {
     return joke;
   }
 
-  async vote(joke: Joke, isLiked: boolean): Promise<void> {
+  async vote(jokeDto: JokeDto, isLiked: boolean): Promise<void> {
+    const joke = await this.jokeRepository.findOne({
+      where: { id: jokeDto.id },
+    });
+    if (!joke) {
+      throw new HttpException('Joke not found', 404);
+    }
     if (isLiked) {
       joke.likes++;
     } else {

@@ -1,5 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('jokes')
 @Entity()
 export class Joke {
   @PrimaryGeneratedColumn()

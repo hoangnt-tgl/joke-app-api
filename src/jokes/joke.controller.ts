@@ -1,7 +1,16 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  BadRequestException,
+} from '@nestjs/common';
 import { Joke } from './joke.entity';
 import { JokesService } from './jokes.service';
-
+import { ApiTags, ApiBody } from '@nestjs/swagger';
+import { JokeDto } from './joke.dto';
+import { validate } from 'class-validator';
+@ApiTags('jokes')
 @Controller('jokes')
 export class JokesController {
   constructor(private readonly jokesService: JokesService) {}
@@ -12,12 +21,20 @@ export class JokesController {
   }
 
   @Post('like')
-  async like(@Body('joke') joke: Joke): Promise<void> {
-    await this.jokesService.vote(joke, true);
+  @ApiBody({ type: JokeDto })
+  async like(@Body() jokeDto: JokeDto): Promise<void> {
+    const errors = await validate(jokeDto);
+    if (errors.length > 0) {
+      throw new BadRequestException(errors);
+    }
+
+    await this.jokesService.vote(jokeDto, true);
   }
 
   @Post('dislike')
-  async dislike(@Body('joke') joke: Joke): Promise<void> {
-    await this.jokesService.vote(joke, false);
+  @ApiBody({ type: JokeDto })
+  async dislike(@Body() jokeDto: JokeDto): Promise<void> {
+    console.log('dislike', jokeDto);
+    await this.jokesService.vote(jokeDto, false);
   }
 }
